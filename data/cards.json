@@ -1,0 +1,146 @@
+[
+  {
+    "id": "mages_0",
+    "deck": "mages",
+    "name": "Искра",
+    "cost": 1,
+    "atk": 1,
+    "hp": 2,
+    "file": "res://assets/generated/cards/mages_0.png"
+  },
+  {
+    "id": "mages_1",
+    "deck": "mages",
+    "name": "Щит",
+    "cost": 2,
+    "atk": 0,
+    "hp": 4,
+    "file": "res://assets/generated/cards/mages_1.png"
+  },
+  {
+    "id": "mages_2",
+    "deck": "mages",
+    "name": "Зов",
+    "cost": 2,
+    "atk": 2,
+    "hp": 2,
+    "file": "res://assets/generated/cards/mages_2.png"
+  },
+  {
+    "id": "mages_3",
+    "deck": "mages",
+    "name": "Вьюга",
+    "cost": 3,
+    "atk": 3,
+    "hp": 2,
+    "file": "res://assets/generated/cards/mages_3.png"
+  },
+  {
+    "id": "kings_0",
+    "deck": "kings",
+    "name": "Страж",
+    "cost": 2,
+    "atk": 1,
+    "hp": 4,
+    "file": "res://assets/generated/cards/kings_0.png"
+  },
+  {
+    "id": "kings_1",
+    "deck": "kings",
+    "name": "Указ",
+    "cost": 1,
+    "atk": 1,
+    "hp": 1,
+    "file": "res://assets/generated/cards/kings_1.png"
+  },
+  {
+    "id": "kings_2",
+    "deck": "kings",
+    "name": "Казна",
+    "cost": 2,
+    "atk": 0,
+    "hp": 3,
+    "file": "res://assets/generated/cards/kings_2.png"
+  },
+  {
+    "id": "kings_3",
+    "deck": "kings",
+    "name": "Рыцарь",
+    "cost": 3,
+    "atk": 3,
+    "hp": 3,
+    "file": "res://assets/generated/cards/kings_3.png"
+  },
+  {
+    "id": "dead_0",
+    "deck": "dead",
+    "name": "Кость",
+    "cost": 1,
+    "atk": 2,
+    "hp": 1,
+    "file": "res://assets/generated/cards/dead_0.png"
+  },
+  {
+    "id": "dead_1",
+    "deck": "dead",
+    "name": "Склеп",
+    "cost": 2,
+    "atk": 1,
+    "hp": 4,
+    "file": "res://assets/generated/cards/dead_1.png"
+  },
+  {
+    "id": "dead_2",
+    "deck": "dead",
+    "name": "Чума",
+    "cost": 2,
+    "atk": 2,
+    "hp": 2,
+    "file": "res://assets/generated/cards/dead_2.png"
+  },
+  {
+    "id": "dead_3",
+    "deck": "dead",
+    "name": "Тлен",
+    "cost": 3,
+    "atk": 3,
+    "hp": 1,
+    "file": "res://assets/generated/cards/dead_3.png"
+  },
+  {
+    "id": "beasts_0",
+    "deck": "beasts",
+    "name": "Волк",
+    "cost": 1,
+    "atk": 2,
+    "hp": 1,
+    "file": "res://assets/generated/cards/beasts_0.png"
+  },
+  {
+    "id": "beasts_1",
+    "deck": "beasts",
+    "name": "Медведь",
+    "cost": 3,
+    "atk": 3,
+    "hp": 4,
+    "file": "res://assets/generated/cards/beasts_1.png"
+  },
+  {
+    "id": "beasts_2",
+    "deck": "beasts",
+    "name": "Сова",
+    "cost": 2,
+    "atk": 1,
+    "hp": 2,
+    "file": "res://assets/generated/cards/beasts_2.png"
+  },
+  {
+    "id": "beasts_3",
+    "deck": "beasts",
+    "name": "Олень",
+    "cost": 2,
+    "atk": 2,
+    "hp": 3,
+    "file": "res://assets/generated/cards/beasts_3.png"
+  }
+]
