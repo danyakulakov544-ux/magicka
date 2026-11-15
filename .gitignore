@@ -1,0 +1,10 @@
+# Godot 4
+.godot/
+*.translation
+export.cfg
+build/
+
+# OS / editor
+.DS_Store
+*.tmp
+*~
