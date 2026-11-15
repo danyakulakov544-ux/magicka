@@ -16,16 +16,16 @@
 | `assets/kenney/pirate/chest.glb` | [Pirate Kit](https://kenney.nl/assets/pirate-kit) | CC0 | агент, PR #2 | в прототипе | — | — |
 | `assets/polyhaven/wood_diff.jpg`, `wood_nor.jpg`, `wood_rough.jpg` | [wood_table_001](https://polyhaven.com/a/wood_table_001), Dimitrios Savva, Rico Cilliers | CC0 | агент, PR #2 | в прототипе | — | — |
 | `assets/polyhaven/fireplace_1k.hdr` | [fireplace](https://polyhaven.com/a/fireplace), только тёмный ambient | CC0 | агент, PR #2 | в прототипе | — | — |
-| `assets/polyhaven/rogland_clear_night_1k.hdr` | [rogland_clear_night](https://polyhaven.com/a/rogland_clear_night) | CC0 | агент, PR #2 | в прототипе | — | — |
-| `assets/kaykit/Knight.glb` | [KayKit Adventurers](https://kaylousberg.itch.io/kaykit-adventurers), зеркало [GitHub](https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0). Клипы Idle и Sit_Chair_Idle уже внутри файла | CC0 | агент, PR #2 | в прототипе | — | — |
-| `assets/kaykit/Mage.glb` | тот же пак Adventurers | CC0 | агент, PR #2 | в прототипе | — | — |
-| `assets/kaykit/Skeleton_Warrior.glb` | [KayKit Skeletons](https://kaylousberg.itch.io/kaykit-skeletons), зеркало [GitHub](https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Skeletons-1.0) | CC0 | агент, PR #2 | в прототипе | — | — |
-| `assets/quaternius/Crown.glb` | [Crown](https://poly.pizza/m/i0PZVuVlYv), Quaternius, файл из зеркала [quaternius-showcase](https://github.com/trebeljahr/quaternius-showcase) | CC0 | агент, PR #2 | в прототипе | — | — |
+| `assets/opponents/human_king.glb` | [Grab3D Winter King](https://grab3d.com/models/characters/king/). CC0, основа сгенерирована ИИ (Meshy), затем почищена в Blender. В игре 24 000 треугольников, текстуры 2048 | CC0 | агент, PR #2 | в прототипе | — | — |
+| `assets/opponents/mage_king.glb` | [Grab3D Wizard](https://grab3d.com/models/characters/wizard/). CC0, AI-основа. В игре 24 000 треугольников, текстуры 2048 | CC0 | агент, PR #2 | в прототипе | — | — |
+| `assets/opponents/bear.glb` | [Grab3D Brown Bear](https://grab3d.com/models/animals/bear/). CC0, AI-основа. В игре 24 000 треугольников, текстуры 2048 | CC0 | агент, PR #2 | в прототипе | — | — |
+| `assets/opponents/undead_king.glb` | [Undead Mage](https://opengameart.org/content/undead-mage), Dmitry.Porotnikov. FBX и PBR-текстуры собраны в GLB, 15 082 треугольника | CC-BY 3.0 | агент, PR #2 | в прототипе | — | — |
+| `assets/sky/space_lightblue.jpg`, `assets/sky/space_red.jpg` | [Space Skyboxes](https://opengameart.org/content/space-skyboxes-0), StumpyStrust, наборы light blue и red, собраны в панорамы 2048×1024 | CC0 | агент, PR #2 | в прототипе | — | — |
+| `shaders/nebula_sky.gdshader` | адаптирован из [Nebula Stars Clouds](https://godotshaders.com/shader/nebula-stars-clouds/), grimbeef: дрейф, сдвиг цвета, мерцание звёзд, поверх панорам | CC0 | агент, PR #2 | в прототипе | — | — |
 | `assets/quaternius/Chest_Open.glb` | Quaternius, [сундук на Poly Pizza](https://poly.pizza/m/vXaxy7ortM) не открылся (403); взят Chest_Open из того же CC0-пака | CC0 | агент, PR #2 | в прототипе | — | — |
 | `assets/quaternius/Coin.glb`, `Gold_Ingots.glb` | Quaternius CC0, [монета](https://poly.pizza/m/3jRhAgbc6t) и [слитки](https://poly.pizza/m/pTZyPTMH88); файлы из того же зеркала | CC0 | агент, PR #2 | в прототипе | — | — |
-| `assets/quaternius/bear.glb` | Sketchfab CC-BY и Poly Pizza не скачались (401 и 403). В сборке [Low Poly Bear](https://grab3d.com/models/animals/low-poly-bear/) | CC0 | агент, PR #2 | в прототипе | — | — |
 | `assets/kenney/survival/workbench-anvil.glb` | [Survival Kit](https://kenney.nl/assets/survival-kit) | CC0 | агент, PR #2 | в прототипе | — | — |
-| `assets/portraits/heroes/` | временные круги с голов этих же моделей | своё | агент, PR #2 | в прототипе | нет случайности | `tools/render_portraits.gd`: камера на голову, круг и цветная обводка. Файлы можно заменить |
+| `assets/portraits/heroes/` | рендер голов `assets/opponents/` | своё | агент, PR #2 | в прототипе | нет случайности | `tools/render_portraits.gd`: камера на лицо, круг и цветная обводка. Файлы можно заменить |
 | `fonts/NotoSans-Regular.ttf` | [Noto Sans](https://fonts.google.com/noto/specimen/Noto+Sans), текст лицензии в `fonts/NotoSans-OFL.txt` | OFL 1.1 | начальный коммит | в прототипе | — | — |
 | `assets/generated/cards/` | нет подходящего CC0-портрета колоды | своё | агент, PR #2 | в прототипе | `index * 17 + ord(колода[0])`, шум бумаги | `tools/gen_art.py`: рамка колоды, силуэт, стоимость, атака, здоровье |
 | `assets/generated/card_back.png` | нет подходящей рубашки CC0 | своё | агент, PR #2 | в прототипе | `3` | `tools/gen_art.py`, `card_back`: круг, ромб, четыре точки |

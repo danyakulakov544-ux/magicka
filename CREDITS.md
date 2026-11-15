@@ -5,16 +5,17 @@
 ## CC0
 
 - Kenney — тайлы Tiny Town, Survival Kit (наковальня), мебель, еда, кладбище, настольные иконки. https://kenney.nl
-- KayKit Adventurers (Knight, Mage) и KayKit Skeletons (Skeleton_Warrior), включая клипы Idle и Sit_Chair_Idle. https://kaylousberg.itch.io/kaykit-adventurers и https://kaylousberg.itch.io/kaykit-skeletons
-- Quaternius — корона, открытый сундук, монета, слитки. https://quaternius.com и https://poly.pizza
-- Poly Haven — wood_table_001 и rogland_clear_night. https://polyhaven.com
-- Grab3D — низкополигональный медведь, CC0. https://grab3d.com/models/animals/low-poly-bear/
+- Quaternius — открытый сундук, монета, слитки. https://quaternius.com и https://poly.pizza
+- Poly Haven — wood_table_001. https://polyhaven.com
+- Grab3D — Winter King, Wizard и Brown Bear. Лицензия CC0. Основа сеток и текстур сгенерирована ИИ (Meshy), затем почищена, масштабирована и проверена в Blender. https://grab3d.com/models/characters/king/ https://grab3d.com/models/characters/wizard/ https://grab3d.com/models/animals/bear/
+- StumpyStrust — Space Skyboxes, наборы light blue и red, собраны в панорамы. https://opengameart.org/content/space-skyboxes-0
+- grimbeef — шейдер Nebula Stars Clouds, CC0, адаптирован в `shaders/nebula_sky.gdshader`. https://godotshaders.com/shader/nebula-stars-clouds/
 
-## Медведь, которого просили
+## CC-BY 3.0
 
-Модель [Cartoon Lowpoly Bear](https://sketchfab.com/3d-models/cartoon-lowpoly-bear-9fc7a6083fa54a19a4821c5c4b94940b) автора Surinapiri - Suruvuori, лицензия CC-BY 4.0, без входа не скачалась (Sketchfab отвечает 401). Запасной адрес Poly Pizza тоже ответил 403. В игре поэтому стоит CC0-медведь Grab3D, не модель Surinapiri. Если файл медведя положить вместо `assets/quaternius/bear.glb`, атрибуция такая:
+Undead Mage, Dmitry.Porotnikov. https://opengameart.org/content/undead-mage
 
-> Cartoon Lowpoly Bear by Surinapiri - Suruvuori, CC BY 4.0. https://sketchfab.com/3d-models/cartoon-lowpoly-bear-9fc7a6083fa54a19a4821c5c4b94940b
+> Undead Mage by Dmitry.Porotnikov, licensed under CC BY 3.0. https://opengameart.org/content/undead-mage
 
 ## Шрифт
 

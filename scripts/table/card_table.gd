@@ -192,99 +192,63 @@ func _hero_id() -> String:
 
 func _build_opponent() -> void:
 	var heroes := {
-		"human_king": "res://assets/kaykit/Knight.glb",
-		"mage_king": "res://assets/kaykit/Mage.glb",
-		"undead_king": "res://assets/kaykit/Skeleton_Warrior.glb",
-		"bear": "res://assets/quaternius/bear.glb",
+		"human_king": "res://assets/opponents/human_king.glb",
+		"mage_king": "res://assets/opponents/mage_king.glb",
+		"undead_king": "res://assets/opponents/undead_king.glb",
+		"bear": "res://assets/opponents/bear.glb",
 	}
 	var hero := _hero_id()
 	var path: String = str(heroes.get(hero, heroes["human_king"]))
 	var actor := (load(path) as PackedScene).instantiate() as Node3D
 	_world.add_child(actor)
-	# KayKit rigs are already about human height. Skinned-mesh bounds are not.
+	_seat_opponent(actor, hero)
+	_opponent_idle(actor)
+	var key := OmniLight3D.new()
+	key.light_color = Color(0.96, 0.94, 1.0)
+	key.light_energy = 1.55
+	key.omni_range = 4.2
+	key.shadow_enabled = false
+	key.position = Vector3(0.2, 1.35, -0.2)
+	_world.add_child(key)
+	var rim := OmniLight3D.new()
+	rim.light_color = Color(0.45, 0.72, 1.0)
+	rim.light_energy = 1.15
+	rim.omni_range = 3.4
+	rim.shadow_enabled = false
+	rim.position = Vector3(-0.55, 1.7, -1.85)
+	_world.add_child(rim)
+
+
+func _seat_opponent(actor: Node3D, hero: String) -> void:
+	var box := _merged_aabb(actor)
+	var height := maxf(box.size.y, 0.001)
+	var target_h := 1.28
 	if hero == "bear":
-		actor.scale = Vector3.ONE * 0.55
-		actor.position = Vector3(0.0, TABLE_Y - 0.02, -1.05)
-		actor.rotation.y = 0.0
-	else:
-		actor.scale = Vector3.ONE * 0.48
-		actor.position = Vector3(0.0, TABLE_Y - 0.15, -0.98)
-		actor.rotation.y = PI
-	_hide_spare_weapons(actor, hero)
-	if hero == "bear":
-		_bear_idle(actor)
-	else:
-		_play_sit(actor)
-	_wear_crown(actor)
-	var face := OmniLight3D.new()
-	face.light_color = Color(1.0, 0.78, 0.55)
-	face.light_energy = 0.7
-	face.omni_range = 1.8
-	face.shadow_enabled = false
-	face.position = Vector3(0.1, TABLE_Y + 0.55, -0.55)
-	_world.add_child(face)
-
-
-func _wear_crown(actor: Node3D) -> void:
-	var head := actor.find_child("head", true, false)
-	var crown := (load("res://assets/quaternius/Crown.glb") as PackedScene).instantiate() as Node3D
-	var host: Node = head if head != null else actor
-	host.add_child(crown)
-	# Source crown is about 8 mm tall. 22× on a unit-scale head is a small circlet.
-	crown.scale = Vector3.ONE * 0.35
-	crown.position = Vector3(0.0, 0.18, 0.04) if head != null else actor.position + Vector3(0, 0.7, 0)
-	crown.rotation = Vector3.ZERO
-
-
-func _hide_spare_weapons(root: Node, hero: String) -> void:
-	var keep := "1h_sword"
-	if hero == "mage_king":
-		keep = "2h_staff"
+		target_h = 1.15
 	elif hero == "undead_king":
-		keep = "sword"
-	for node in root.find_children("*", "Node3D", true, false):
-		var nm := String(node.name).to_lower()
-		var gear := nm.contains("sword") or nm.contains("shield") or nm.contains("spellbook") or nm.contains("wand") or nm.contains("staff") or nm.contains("axe") or nm.contains("bow")
-		if gear and not nm.contains(keep):
-			node.visible = false
+		target_h = 1.85
+	var s := target_h / height
+	# Imported glTF faces Godot +Z. Turn that face toward the camera (+Z world).
+	var z_max := box.position.z + box.size.z
+	var center_x := box.get_center().x
+	var y_min := box.position.y
+	actor.scale = Vector3.ONE * s
+	actor.rotation.y = 0.0
+	var floor_y := 0.02 if hero == "bear" else -0.02
+	actor.position = Vector3(-center_x * s, floor_y - y_min * s, -1.05 - z_max * s)
 
 
-func _play_sit(root: Node) -> void:
-	var found := root.find_children("*", "AnimationPlayer", true, false)
-	if found.is_empty():
-		return
-	var ap := found[0] as AnimationPlayer
-	var chosen := ""
-	for name in ap.get_animation_list():
-		var text := String(name)
-		if text.ends_with("Sit_Chair_Idle"):
-			chosen = text
-			break
-	if chosen == "":
-		for name in ap.get_animation_list():
-			var text := String(name)
-			if text == "Idle" or text.ends_with("/Idle"):
-				chosen = text
-				break
-	if chosen == "":
-		return
-	var anim := ap.get_animation(chosen)
-	if anim:
-		anim.loop_mode = Animation.LOOP_LINEAR
-	ap.play(chosen)
-
-
-func _bear_idle(actor: Node3D) -> void:
+func _opponent_idle(actor: Node3D) -> void:
 	var base_scale := actor.scale
 	var base_yaw := actor.rotation.y
 	var breath := create_tween()
 	breath.set_loops()
-	breath.tween_property(actor, "scale", base_scale * Vector3(1.03, 1.06, 1.03), 1.3).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	breath.tween_property(actor, "scale", base_scale, 1.3).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	breath.tween_property(actor, "scale", base_scale * Vector3(1.015, 1.035, 1.015), 1.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	breath.tween_property(actor, "scale", base_scale, 1.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	var look := create_tween()
 	look.set_loops()
-	look.tween_property(actor, "rotation:y", base_yaw + 0.18, 1.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	look.tween_property(actor, "rotation:y", base_yaw - 0.18, 1.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	look.tween_property(actor, "rotation:y", base_yaw + 0.06, 2.4).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	look.tween_property(actor, "rotation:y", base_yaw - 0.06, 2.4).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 
 func _build_mode_props() -> void:
@@ -973,27 +937,30 @@ func _build_room() -> void:
 	var env := WorldEnvironment.new()
 	var world_env := Environment.new()
 	var sky := Sky.new()
-	var pano := PanoramaSkyMaterial.new()
-	pano.panorama = load("res://assets/polyhaven/rogland_clear_night_1k.hdr")
-	sky.sky_material = pano
+	var nebula := ShaderMaterial.new()
+	nebula.shader = load("res://shaders/nebula_sky.gdshader")
+	nebula.set_shader_parameter("sky_cool", load("res://assets/sky/space_lightblue.jpg"))
+	nebula.set_shader_parameter("sky_warm", load("res://assets/sky/space_red.jpg"))
+	sky.sky_material = nebula
 	world_env.sky = sky
 	world_env.background_mode = Environment.BG_SKY
-	world_env.background_energy_multiplier = 0.75
+	world_env.background_energy_multiplier = 1.15
 	world_env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
-	world_env.ambient_light_energy = 0.16
+	world_env.ambient_light_energy = 0.38
 	world_env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	world_env.tonemap_exposure = 1.05
+	world_env.tonemap_exposure = 1.08
 	world_env.glow_enabled = true
-	world_env.glow_intensity = 0.18
-	world_env.glow_bloom = 0.05
-	world_env.glow_hdr_threshold = 0.95
+	world_env.glow_intensity = 0.22
+	world_env.glow_bloom = 0.06
+	world_env.glow_hdr_threshold = 1.05
 	world_env.fog_enabled = true
 	world_env.fog_mode = Environment.FOG_MODE_DEPTH
-	world_env.fog_depth_begin = 2.6
-	world_env.fog_depth_end = 7.0
-	world_env.fog_depth_curve = 1.15
-	world_env.fog_light_color = Color(0.04, 0.05, 0.08)
-	world_env.fog_light_energy = 0.2
+	world_env.fog_sky_affect = 0.0
+	world_env.fog_depth_begin = 3.4
+	world_env.fog_depth_end = 9.0
+	world_env.fog_depth_curve = 1.2
+	world_env.fog_light_color = Color(0.28, 0.14, 0.36)
+	world_env.fog_light_energy = 0.35
 	env.environment = world_env
 	_world.add_child(env)
 
@@ -1010,15 +977,15 @@ func _build_room() -> void:
 	_rig.add_child(_cam)
 
 	var sun := DirectionalLight3D.new()
-	sun.light_color = Color(1.0, 0.92, 0.82)
-	sun.light_energy = 0.03
-	sun.rotation_degrees = Vector3(-55, 25, 0)
+	sun.light_color = Color(0.82, 0.88, 1.0)
+	sun.light_energy = 0.55
+	sun.rotation_degrees = Vector3(-48, 18, 0)
 	sun.shadow_enabled = false
 	_world.add_child(sun)
 
 	var fill := OmniLight3D.new()
-	fill.light_color = Color(0.35, 0.45, 0.55)
-	fill.light_energy = 0.1
+	fill.light_color = Color(0.55, 0.62, 0.85)
+	fill.light_energy = 0.45
 	fill.omni_range = 3.4
 	fill.shadow_enabled = false
 	fill.position = Vector3(-0.2, 1.35, 0.4)

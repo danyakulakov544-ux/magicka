@@ -4,10 +4,10 @@ extends SceneTree
 ## Replace the PNGs later; paths stay the same.
 
 const HEROES := [
-	{"id": "human_king", "scene": "res://assets/kaykit/Knight.glb", "border": Color("d4a24a")},
-	{"id": "mage_king", "scene": "res://assets/kaykit/Mage.glb", "border": Color("6f8fd4")},
-	{"id": "undead_king", "scene": "res://assets/kaykit/Skeleton_Warrior.glb", "border": Color("8d9a78")},
-	{"id": "bear", "scene": "res://assets/quaternius/bear.glb", "border": Color("c47848")},
+	{"id": "human_king", "scene": "res://assets/opponents/human_king.glb", "border": Color("d4a24a")},
+	{"id": "mage_king", "scene": "res://assets/opponents/mage_king.glb", "border": Color("6f8fd4")},
+	{"id": "undead_king", "scene": "res://assets/opponents/undead_king.glb", "border": Color("8d9a78")},
+	{"id": "bear", "scene": "res://assets/opponents/bear.glb", "border": Color("c47848")},
 ]
 
 
@@ -52,18 +52,22 @@ func _render_one(hero: Dictionary) -> void:
 	var height := maxf(box.size.y, 0.001)
 	var focus := box.get_center()
 	focus.y = box.position.y + box.size.y * 0.78
-	if str(hero["id"]) == "bear":
+	if str(hero["id"]) == "undead_king":
+		focus.y = box.position.y + box.size.y * 0.48
+	elif str(hero["id"]) == "bear":
 		focus = box.get_center()
-		focus.y = box.position.y + box.size.y * 0.62
+		focus.y = box.position.y + box.size.y * 0.72
 	var cam := Camera3D.new()
 	cam.fov = 32.0
 	cam.current = true
 	world.add_child(cam)
+	# Models face Godot +Z.
 	if str(hero["id"]) == "bear":
-		focus = Vector3(box.get_center().x, box.position.y + box.size.y * 0.42, box.position.z + box.size.z * 0.18)
-		cam.position = Vector3(focus.x + 0.15, focus.y + 0.35, box.position.z - 0.35)
+		focus = Vector3(box.get_center().x, box.position.y + box.size.y * 0.8, box.position.z + box.size.z * 0.78)
+		cam.position = Vector3(focus.x, focus.y + box.size.y * 0.04, box.position.z + box.size.z * 1.45)
+		cam.fov = 28.0
 	else:
-		cam.position = focus + Vector3(0.0, height * 0.08, height * 1.35)
+		cam.position = focus + Vector3(0.0, height * 0.04, height * 0.9)
 	cam.look_at(focus, Vector3.UP)
 	for _i in 6:
 		await process_frame
