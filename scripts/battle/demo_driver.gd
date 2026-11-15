@@ -8,6 +8,7 @@ var _time: float = 0.0
 var _fired: Dictionary = {}
 var _shot_pending: bool = false
 var _shot_saved: bool = false
+var _shot_win: bool = false
 
 
 func _ready() -> void:
@@ -38,7 +39,8 @@ func _physics_process(delta: float) -> void:
 		_q(0, "water")
 		_q(1, "lightning")
 	)
-	_at(2.3, func() -> void: _request_shot())
+	_at(2.3, func() -> void: _request_shot(false))
+	_at(7.7, func() -> void: _request_shot(true))
 	_at(2.6, func() -> void:
 		_move(0, 1.0)
 		_move(1, -1.0)
@@ -83,10 +85,12 @@ func _physics_process(delta: float) -> void:
 
 
 func _process(_delta: float) -> void:
-	if _shot_pending and not _shot_saved:
+	if _shot_pending:
+		var win := _shot_win
 		_shot_pending = false
-		_shot_saved = true
-		_save_shot()
+		if win:
+			_shot_saved = true
+		_save_shot(win)
 
 
 func _at(at_time: float, action: Callable) -> void:
@@ -96,9 +100,13 @@ func _at(at_time: float, action: Callable) -> void:
 		action.call()
 
 
-func _request_shot() -> void:
-	if _shot_path() != "":
-		_shot_pending = true
+func _request_shot(win: bool) -> void:
+	if _shot_path() == "":
+		return
+	if win and _shot_saved:
+		return
+	_shot_win = win
+	_shot_pending = true
 
 
 func _shot_path() -> String:
@@ -108,13 +116,15 @@ func _shot_path() -> String:
 	return ""
 
 
-func _save_shot() -> void:
+func _save_shot(win: bool) -> void:
 	await RenderingServer.frame_post_draw
 	var image: Image = get_viewport().get_texture().get_image()
 	if image == null:
 		push_error("Скриншот: пустой кадр")
 		return
 	var path := _shot_path()
+	if win and path.ends_with(".png"):
+		path = path.trim_suffix(".png") + "-win.png"
 	var err := image.save_png(path)
 	print("SHOT %s err=%s size=%s" % [path, err, image.get_size()])
 

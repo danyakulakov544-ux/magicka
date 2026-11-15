@@ -12,6 +12,7 @@ func _go() -> void:
 	_test_spellbook()
 	var packed: PackedScene = load("res://scenes/battle/battle_arena.tscn")
 	var arena: Node = packed.instantiate()
+	root.set_meta("magicka_test", true)
 	root.add_child(arena)
 	await process_frame
 	await _test_battle(arena)

@@ -32,10 +32,13 @@ func _ready() -> void:
 	theme.set_font_size("font_size", "Label", 12)
 	root.theme = theme
 	add_child(root)
-	_build_panel(0, 8.0, "МАГ 1", Color("3a56e8"))
-	_build_panel(1, 482.0, "МАГ 2", Color("d43b4a"))
-	_build_toast()
-	_build_hints()
+	var view := get_viewport().get_visible_rect().size
+	if view.x < 200.0:
+		view = Vector2(1280, 720)
+	_build_panel(0, 16.0, "МАГ 1", Color("3a56e8"))
+	_build_panel(1, view.x - 176.0, "МАГ 2", Color("d43b4a"))
+	_build_toast(view)
+	_build_hints(view)
 	_build_banner()
 
 
@@ -150,17 +153,17 @@ func _build_panel(slot: int, x: float, title: String, stripe: Color) -> void:
 	_previews.append(preview)
 
 
-func _build_toast() -> void:
-	toast = _label("", 15, Vector2(170, 4), Vector2(300, 22))
+func _build_toast(view: Vector2) -> void:
+	toast = _label("", 22, Vector2(view.x * 0.5 - 280.0, 8), Vector2(560, 32))
 	toast.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
 
-func _build_hints() -> void:
-	var bar := _rect(Vector2(0, 328), Vector2(640, 32), Color(0, 0, 0, 0.45))
+func _build_hints(view: Vector2) -> void:
+	var bar := _rect(Vector2(0, view.y - 44), Vector2(view.x, 44), Color(0, 0, 0, 0.45))
 	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var line_one := _label("Маг 1: A/D · Q огонь · W вода · E молния · R земля · F жизнь · Пробел каст · S себя · C сброс", 10, Vector2(6, 328), Vector2(628, 15))
+	var line_one := _label("WASD — ход   Q/1 огонь  Z/2 вода  E/3 молния  R/4 земля  F/5 жизнь   ЛКМ — в противника   ПКМ — на себя   C — сброс", 16, Vector2(8, view.y - 40), Vector2(view.x - 16, 20))
 	line_one.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	var line_two := _label("Маг 2: ←/→ · U I O P H те же стихии · K каст · J себя · ; сброс · Enter — новый раунд", 10, Vector2(6, 342), Vector2(628, 15))
+	var line_two := _label("Второй маг — бот. Мышь задаёт прицел. Enter — новый раунд после победы.", 15, Vector2(8, view.y - 20), Vector2(view.x - 16, 18))
 	line_two.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
 
