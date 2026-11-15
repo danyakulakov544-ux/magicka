@@ -106,9 +106,10 @@ func _cast(mage: Mage, at_self: bool) -> void:
 		mage.cast_lock = 0.12
 		return
 	var mode := "self" if at_self else "foe"
+	var orb_count := mage.orbs.size()
 	var result := book.resolve(mage.orbs, mode)
 	mage.orbs.clear()
-	mage.cast_lock = book.cast_cooldown
+	mage.cast_lock = book.cooldown_for(orb_count, result["effects"])
 	last_cast_name = str(result["name"])
 	hud.show_toast(last_cast_name, result["color"])
 	if bool(result["fizzle"]) or str(result["delivery"]) == "none":

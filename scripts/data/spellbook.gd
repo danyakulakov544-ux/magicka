@@ -13,7 +13,9 @@ var max_queue: int = 3
 var max_hp: int = 100
 var max_shield: int = 80
 var move_speed: float = 120.0
-var cast_cooldown: float = 0.28
+var cast_cooldown: float = 0.25
+var cast_cooldown_per_orb: float = 0.15
+var heal_cooldown_multiplier: float = 2.5
 var arena_min_x: float = 36.0
 var arena_max_x: float = 604.0
 var elements: Dictionary = {}
@@ -51,7 +53,9 @@ func load_data(data: Dictionary) -> void:
 	max_hp = int(rules.get("max_hp", 100))
 	max_shield = int(rules.get("max_shield", 80))
 	move_speed = float(rules.get("move_speed", 120))
-	cast_cooldown = float(rules.get("cast_cooldown", 0.28))
+	cast_cooldown = float(rules.get("cast_cooldown", 0.25))
+	cast_cooldown_per_orb = float(rules.get("cast_cooldown_per_orb", 0.15))
+	heal_cooldown_multiplier = float(rules.get("heal_cooldown_multiplier", 2.5))
 	arena_min_x = float(rules.get("arena_min_x", 36))
 	arena_max_x = float(rules.get("arena_max_x", 604))
 	var raw_elements: Dictionary = data.get("elements", {})
@@ -218,6 +222,16 @@ func cancel(queue: Array) -> Array[String]:
 		if not removed:
 			index += 1
 	return pool
+
+
+## Пауза после каста: база + добавка за каждую сферу в очереди.
+## Лечение умножает паузу, чтобы хил не отменял размен.
+func cooldown_for(orb_count: int, effects: Array) -> float:
+	var cooldown := cast_cooldown + cast_cooldown_per_orb * float(maxi(orb_count, 0))
+	for effect in effects:
+		if str(effect.get("kind", "")) == "heal":
+			return cooldown * heal_cooldown_multiplier
+	return cooldown
 
 
 func color_of(element_id: String) -> Color:

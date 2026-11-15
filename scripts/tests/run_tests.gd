@@ -71,7 +71,7 @@ func _test_spellbook() -> void:
 	_expect(str(rock["id"]) == "earth", "fire+water+earth leaves earth")
 	var life_left := book.resolve(["lightning", "earth", "life"], "self")
 	_expect(str(life_left["id"]) == "life", "lightning+earth cancel, life remains")
-	_expect(_amount(life_left, "heal") == 22, "remaining life heals on self")
+	_expect(_amount(life_left, "heal") == 12, "remaining life heals on self")
 
 	var inferno := book.resolve(["fire", "fire", "fire"], "foe")
 	_expect(str(inferno["delivery"]) == "area", "inferno is an area")
@@ -80,10 +80,15 @@ func _test_spellbook() -> void:
 	var smite := book.resolve(["life"], "foe")
 	_expect(str(heal["name"]) == "Исцеление", "life self name")
 	_expect(str(smite["name"]) == "Кара", "life foe name")
-	_expect(_amount(heal, "heal") == 22, "heal amount")
+	_expect(_amount(heal, "heal") == 12, "heal amount")
 	_expect(_amount(smite, "damage") == 12, "smite damage")
+	var spark := book.resolve(["lightning"], "foe")
+	_expect(_amount(spark, "damage") == 11, "single beam is 25 percent under 15")
 	var ward := book.resolve(["earth", "life"], "self")
-	_expect(_amount(ward, "shield") == 40, "stone shield")
+	_expect(_amount(ward, "shield") == 24, "stone shield")
+	_expect(is_equal_approx(book.cooldown_for(1, spark["effects"]), 0.4), "one orb is 0.4s")
+	_expect(is_equal_approx(book.cooldown_for(3, spark["effects"]), 0.7), "three orbs are 0.7s")
+	_expect(is_equal_approx(book.cooldown_for(1, heal["effects"]), 1.0), "a heal waits 2.5x")
 	var magma_a := book.resolve(["earth", "fire"], "foe")
 	var magma_b := book.resolve(["fire", "earth"], "foe")
 	_expect(str(magma_a["id"]) == str(magma_b["id"]), "order does not matter")
@@ -139,38 +144,41 @@ func _test_battle(arena: Node) -> void:
 	arena.apply_command(_queue(0, "fire"))
 	arena.apply_command(_queue(0, "water"))
 	arena.apply_command(_cast(0, false))
+	_expect(is_equal_approx(left.cast_lock, 0.55), "two orbs wait 0.55s, lock=%s" % left.cast_lock)
 	await _frames(5)
 	_expect(right.hp == hp_before, "cancelled orbs do no damage")
 	_expect(str(arena.last_cast_name) == "Сферы погасли", "fizzle name")
-	await _frames(25)
+	await _await_cast_ready(left)
 
 	arena.apply_command(_queue(0, "fire"))
 	arena.apply_command(_queue(0, "fire"))
 	arena.apply_command(_queue(0, "water"))
 	arena.apply_command(_cast(0, false))
+	_expect(is_equal_approx(left.cast_lock, 0.7), "three orbs wait 0.7s, lock=%s" % left.cast_lock)
 	await _frames(40)
 	_expect(right.hp == 84, "partial cancel casts a 16-damage fireball, hp=%d" % right.hp)
-	await _frames(25)
+	await _await_cast_ready(left)
 
 	left.hp = 50
 	arena.apply_command(_queue(0, "life"))
 	arena.apply_command(_cast(0, true))
+	_expect(is_equal_approx(left.cast_lock, 1.0), "heal waits 1s, lock=%s" % left.cast_lock)
 	await _frames(5)
-	_expect(left.hp == 72, "self life heals to 72, hp=%d" % left.hp)
+	_expect(left.hp == 62, "self life heals to 62, hp=%d" % left.hp)
 	_expect(str(arena.last_cast_name) == "Исцеление", "heal cast name")
-	await _frames(25)
+	await _await_cast_ready(left)
 
 	arena.apply_command(_queue(0, "earth"))
 	arena.apply_command(_queue(0, "life"))
 	arena.apply_command(_cast(0, true))
-	_expect(left.shield == 40, "self earth+life grants 40 shield, shield=%d" % left.shield)
+	_expect(left.shield == 24, "self earth+life grants 24 shield, shield=%d" % left.shield)
 	var hp_at_shield := left.hp
 	arena.apply_command(_queue(1, "fire"))
 	arena.apply_command(_cast(1, false))
 	await _frames(40)
 	_expect(left.hp == hp_at_shield, "shield absorbs the fireball, hp=%d" % left.hp)
-	_expect(left.shield == 24, "shield left 24, shield=%d" % left.shield)
-	await _frames(25)
+	_expect(left.shield == 8, "shield left 8, shield=%d" % left.shield)
+	await _await_cast_ready(left)
 
 	left.position.x = 240.0
 	right.position.x = 290.0
@@ -181,7 +189,7 @@ func _test_battle(arena: Node) -> void:
 	arena.apply_command(_cast(0, false))
 	await _frames(8)
 	_expect(right.hp == hp_before_inferno - 36, "point-blank inferno hits, hp=%d" % right.hp)
-	await _frames(25)
+	await _await_cast_ready(left)
 
 	right.hp = 10
 	arena.apply_command(_queue(0, "fire"))
@@ -204,6 +212,14 @@ func _test_battle(arena: Node) -> void:
 func _frames(count: int) -> void:
 	for _i in count:
 		await physics_frame
+
+
+func _await_cast_ready(mage: Mage) -> void:
+	var guard := 0
+	while mage.cast_lock > 0.0 and guard < 500:
+		await physics_frame
+		guard += 1
+	_expect(mage.cast_lock <= 0.0, "cooldown finished, lock=%s" % mage.cast_lock)
 
 
 func _queue(slot: int, element_id: String) -> BattleCommand:

@@ -5,9 +5,11 @@
     "max_hp": 100,
     "max_shield": 80,
     "move_speed": 120,
-    "cast_cooldown": 0.28,
+    "cast_cooldown": 0.25,
     "arena_min_x": 36,
-    "arena_max_x": 604
+    "arena_max_x": 604,
+    "cast_cooldown_per_orb": 0.15,
+    "heal_cooldown_multiplier": 2.5
   },
   "elements": {
     "fire": {
@@ -132,7 +134,7 @@
           "effects": [
             {
               "kind": "damage",
-              "amount": 15
+              "amount": 11
             }
           ],
           "length": 200,
@@ -144,7 +146,7 @@
           "effects": [
             {
               "kind": "damage",
-              "amount": 14
+              "amount": 11
             }
           ]
         }
@@ -204,7 +206,7 @@
           "effects": [
             {
               "kind": "heal",
-              "amount": 22
+              "amount": 12
             }
           ]
         }
@@ -254,7 +256,7 @@
           "effects": [
             {
               "kind": "damage",
-              "amount": 22
+              "amount": 17
             }
           ],
           "length": 170,
@@ -266,7 +268,7 @@
           "effects": [
             {
               "kind": "damage",
-              "amount": 18
+              "amount": 14
             }
           ]
         }
@@ -285,7 +287,7 @@
           "effects": [
             {
               "kind": "damage",
-              "amount": 26
+              "amount": 20
             }
           ],
           "length": 220,
@@ -297,7 +299,7 @@
           "effects": [
             {
               "kind": "damage",
-              "amount": 22
+              "amount": 17
             }
           ]
         }
@@ -347,7 +349,7 @@
           "effects": [
             {
               "kind": "damage",
-              "amount": 18
+              "amount": 14
             }
           ],
           "length": 160,
@@ -359,7 +361,7 @@
           "effects": [
             {
               "kind": "heal",
-              "amount": 36
+              "amount": 18
             }
           ]
         }
@@ -448,7 +450,7 @@
           "effects": [
             {
               "kind": "damage",
-              "amount": 40
+              "amount": 30
             }
           ],
           "length": 250,
@@ -460,7 +462,7 @@
           "effects": [
             {
               "kind": "damage",
-              "amount": 30
+              "amount": 23
             }
           ]
         }
@@ -492,7 +494,7 @@
           "effects": [
             {
               "kind": "shield",
-              "amount": 32
+              "amount": 16
             }
           ]
         }
@@ -524,7 +526,7 @@
           "effects": [
             {
               "kind": "heal",
-              "amount": 54
+              "amount": 28
             }
           ]
         }
@@ -617,7 +619,7 @@
           "effects": [
             {
               "kind": "heal",
-              "amount": 14
+              "amount": 7
             }
           ]
         }
@@ -677,7 +679,7 @@
           "effects": [
             {
               "kind": "damage",
-              "amount": 24
+              "amount": 18
             }
           ],
           "length": 180,
@@ -689,7 +691,7 @@
           "effects": [
             {
               "kind": "damage",
-              "amount": 18
+              "amount": 14
             }
           ]
         }
@@ -720,7 +722,7 @@
           "effects": [
             {
               "kind": "heal",
-              "amount": 26
+              "amount": 13
             }
           ]
         }
@@ -739,7 +741,7 @@
           "effects": [
             {
               "kind": "damage",
-              "amount": 20
+              "amount": 15
             }
           ],
           "length": 180,
@@ -751,11 +753,11 @@
           "effects": [
             {
               "kind": "heal",
-              "amount": 12
+              "amount": 6
             },
             {
               "kind": "shield",
-              "amount": 14
+              "amount": 7
             }
           ]
         }
@@ -786,7 +788,7 @@
           "effects": [
             {
               "kind": "shield",
-              "amount": 40
+              "amount": 24
             }
           ]
         }
@@ -870,7 +872,7 @@
           "effects": [
             {
               "kind": "damage",
-              "amount": 32
+              "amount": 24
             }
           ],
           "length": 190,
@@ -882,7 +884,7 @@
           "effects": [
             {
               "kind": "damage",
-              "amount": 26
+              "amount": 20
             }
           ]
         }
@@ -946,7 +948,7 @@
           "effects": [
             {
               "kind": "heal",
-              "amount": 16
+              "amount": 8
             }
           ]
         }
@@ -978,7 +980,7 @@
           "effects": [
             {
               "kind": "heal",
-              "amount": 28
+              "amount": 14
             }
           ]
         }
@@ -1015,7 +1017,7 @@
           "effects": [
             {
               "kind": "shield",
-              "amount": 18
+              "amount": 9
             }
           ]
         }
@@ -1072,7 +1074,7 @@
           "effects": [
             {
               "kind": "damage",
-              "amount": 30
+              "amount": 23
             }
           ],
           "length": 190,
@@ -1084,7 +1086,7 @@
           "effects": [
             {
               "kind": "damage",
-              "amount": 22
+              "amount": 17
             }
           ]
         }
@@ -1104,7 +1106,7 @@
           "effects": [
             {
               "kind": "damage",
-              "amount": 34
+              "amount": 26
             }
           ],
           "length": 210,
@@ -1116,7 +1118,7 @@
           "effects": [
             {
               "kind": "damage",
-              "amount": 24
+              "amount": 18
             }
           ]
         }
@@ -1136,7 +1138,7 @@
           "effects": [
             {
               "kind": "damage",
-              "amount": 14
+              "amount": 11
             }
           ],
           "length": 150,
@@ -1148,7 +1150,7 @@
           "effects": [
             {
               "kind": "heal",
-              "amount": 34
+              "amount": 17
             }
           ]
         }
@@ -1180,7 +1182,7 @@
           "effects": [
             {
               "kind": "heal",
-              "amount": 42
+              "amount": 21
             }
           ]
         }
@@ -1200,7 +1202,7 @@
           "effects": [
             {
               "kind": "damage",
-              "amount": 30
+              "amount": 23
             }
           ],
           "length": 200,
@@ -1212,11 +1214,11 @@
           "effects": [
             {
               "kind": "heal",
-              "amount": 12
+              "amount": 6
             },
             {
               "kind": "shield",
-              "amount": 18
+              "amount": 9
             }
           ]
         }
@@ -1236,7 +1238,7 @@
           "effects": [
             {
               "kind": "damage",
-              "amount": 16
+              "amount": 12
             }
           ],
           "length": 160,
@@ -1248,11 +1250,11 @@
           "effects": [
             {
               "kind": "heal",
-              "amount": 24
+              "amount": 12
             },
             {
               "kind": "shield",
-              "amount": 12
+              "amount": 6
             }
           ]
         }
@@ -1284,7 +1286,7 @@
           "effects": [
             {
               "kind": "shield",
-              "amount": 56
+              "amount": 28
             }
           ]
         }
@@ -1316,11 +1318,11 @@
           "effects": [
             {
               "kind": "shield",
-              "amount": 28
+              "amount": 14
             },
             {
               "kind": "heal",
-              "amount": 18
+              "amount": 9
             }
           ]
         }
@@ -1340,7 +1342,7 @@
           "effects": [
             {
               "kind": "damage",
-              "amount": 28
+              "amount": 21
             }
           ],
           "length": 180,
@@ -1352,11 +1354,11 @@
           "effects": [
             {
               "kind": "heal",
-              "amount": 12
+              "amount": 6
             },
             {
               "kind": "shield",
-              "amount": 10
+              "amount": 5
             }
           ]
         }
@@ -1388,11 +1390,11 @@
           "effects": [
             {
               "kind": "shield",
-              "amount": 20
+              "amount": 10
             },
             {
               "kind": "heal",
-              "amount": 12
+              "amount": 6
             }
           ]
         }
@@ -1429,11 +1431,11 @@
           "effects": [
             {
               "kind": "shield",
-              "amount": 22
+              "amount": 11
             },
             {
               "kind": "heal",
-              "amount": 14
+              "amount": 7
             }
           ]
         }
@@ -1453,7 +1455,7 @@
           "effects": [
             {
               "kind": "damage",
-              "amount": 26
+              "amount": 20
             }
           ],
           "length": 180,
@@ -1465,11 +1467,11 @@
           "effects": [
             {
               "kind": "heal",
-              "amount": 16
+              "amount": 8
             },
             {
               "kind": "shield",
-              "amount": 10
+              "amount": 5
             }
           ]
         }

@@ -1,0 +1,105 @@
+name: Export
+
+on:
+  push:
+    branches:
+      - main
+      - cursor/battle-arena-prototype-e0bf
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: magicka-export
+  cancel-in-progress: false
+
+env:
+  GODOT_VERSION: 4.7.2
+  GODOT_RELEASE: 4.7.2-stable
+  GODOT_TEMPLATE_DIR: 4.7.2.stable
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache export templates
+        id: templates-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/godot-templates
+          key: godot-export-templates-${{ env.GODOT_RELEASE }}
+
+      - name: Install Godot
+        run: |
+          set -euo pipefail
+          curl -fsSL -o "$RUNNER_TEMP/godot.zip" \
+            "https://github.com/godotengine/godot-builds/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip"
+          unzip -q -o "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
+          mkdir -p "$RUNNER_TEMP/bin"
+          install -m 755 "$RUNNER_TEMP/godot/Godot_v${GODOT_RELEASE}_linux.x86_64" "$RUNNER_TEMP/bin/godot"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/bin/godot" --version
+
+      - name: Install export templates
+        run: |
+          set -euo pipefail
+          dest="${HOME}/.local/share/godot/export_templates/${GODOT_TEMPLATE_DIR}"
+          mkdir -p "$dest"
+          if [ ! -f "$RUNNER_TEMP/godot-templates/templates/windows_release_x86_64.exe" ]; then
+            curl -fsSL -o "$RUNNER_TEMP/templates.tpz" \
+              "https://github.com/godotengine/godot-builds/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_export_templates.tpz"
+            rm -rf "$RUNNER_TEMP/godot-templates"
+            unzip -q "$RUNNER_TEMP/templates.tpz" -d "$RUNNER_TEMP/godot-templates"
+          fi
+          cp -a "$RUNNER_TEMP/godot-templates/templates/." "$dest/"
+          test -f "$dest/windows_release_x86_64.exe"
+          test -f "$dest/linux_release.x86_64"
+
+      - name: Export Windows and Linux
+        run: |
+          set -euo pipefail
+          mkdir -p build/windows build/linux
+          godot --headless --path . --export-release "Windows Desktop" "build/windows/MagickaArena.exe"
+          godot --headless --path . --export-release "Linux" "build/linux/MagickaArena.x86_64"
+          test -f build/windows/MagickaArena.exe
+          test ! -e build/windows/MagickaArena.pck
+          file build/windows/MagickaArena.exe | grep -q 'PE32+'
+          test "$(stat -c%s build/windows/MagickaArena.exe)" -gt 30000000
+          test -f build/linux/MagickaArena.x86_64
+          test ! -e build/linux/MagickaArena.pck
+          chmod +x build/linux/MagickaArena.x86_64
+          (cd build/windows && zip -9 -r "$GITHUB_WORKSPACE/MagickaArena-windows.zip" .)
+          (cd build/linux && zip -9 -r "$GITHUB_WORKSPACE/MagickaArena-linux.zip" .)
+
+      - name: Upload Windows build
+        uses: actions/upload-artifact@v4
+        with:
+          name: MagickaArena-windows
+          path: MagickaArena-windows.zip
+          if-no-files-found: error
+
+      - name: Upload Linux build
+        uses: actions/upload-artifact@v4
+        with:
+          name: MagickaArena-linux
+          path: MagickaArena-linux.zip
+          if-no-files-found: error
+
+      - name: Publish rolling prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release delete latest --yes --cleanup-tag || true
+          git push origin :refs/tags/latest || true
+          gh release create latest \
+            --prerelease \
+            --target "${{ github.sha }}" \
+            --title "Magicka Arena — последняя сборка" \
+            --notes "Сборка ${{ github.sha }} из ветки ${{ github.ref_name }}. Windows: распакуйте MagickaArena-windows.zip и запустите MagickaArena.exe. Linux: MagickaArena-linux.zip, затем chmod +x MagickaArena.x86_64." \
+            MagickaArena-windows.zip \
+            MagickaArena-linux.zip
