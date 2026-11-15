@@ -1,0 +1,16 @@
+Ассеты прототипа — CC0 / общественное достояние.
+
+Kenney (kenney.nl), CC0
+  Фишки, иконки узлов, кости, модели свечи, чаши, кубка, книг и силуэта.
+  https://creativecommons.org/publicdomain/zero/1.0/
+
+Poly Haven, CC0
+  wood_table_001 — Dimitrios Savva, Rico Cilliers
+    https://polyhaven.com/a/wood_table_001
+  fireplace (HDRI, только как тёмный ambient, не как картинка комнаты)
+    https://polyhaven.com/a/fireplace
+
+Шрифт интерфейса: Noto Sans, SIL Open Font License 1.1 (fonts/NotoSans-OFL.txt).
+
+Карты, фон карты, рубашка колоды, знак слота и гонг нарисованы для этого прототипа.
+Чужие ассеты Inscryption не используются.

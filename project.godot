@@ -5,15 +5,16 @@ config_version=5
 
 [application]
 
-config/name="Magicka Arena"
-config/description="3D Magicka-style mage duel."
-run/main_scene="res://scenes/battle/battle_arena.tscn"
+config/name="Magicka"
+config/description="Пиксельная карта похода и карточный стол."
+run/main_scene="res://scenes/menu/main_menu.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
 
 [autoload]
 
 MatchSession="*res://scripts/autoload/match_session.gd"
+Journey="*res://scripts/autoload/journey.gd"
 
 [display]
 

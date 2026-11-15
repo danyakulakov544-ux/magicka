@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - cursor/battle-arena-prototype-e0bf
+      - cursor/board-map-card-table-f041
   workflow_dispatch:
 
 permissions:
@@ -99,7 +100,7 @@ jobs:
           gh release create latest \
             --prerelease \
             --target "${{ github.sha }}" \
-            --title "Magicka Arena — последняя сборка" \
-            --notes "Сборка ${{ github.sha }} из ветки ${{ github.ref_name }}. Windows: распакуйте MagickaArena-windows.zip и запустите MagickaArena.exe. Linux: MagickaArena-linux.zip, затем chmod +x MagickaArena.x86_64." \
+            --title "Magicka — последняя сборка" \
+            --notes "Сборка ${{ github.sha }} из ветки ${{ github.ref_name }}. Прототип: карта похода и карточный стол. Windows: распакуйте MagickaArena-windows.zip и запустите MagickaArena.exe. Linux: MagickaArena-linux.zip, затем chmod +x MagickaArena.x86_64." \
             MagickaArena-windows.zip \
             MagickaArena-linux.zip
