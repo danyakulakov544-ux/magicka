@@ -1,0 +1,27 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/battle/battle_arena.gd" id="1_arena"]
+[ext_resource type="PackedScene" path="res://scenes/battle/mage.tscn" id="2_mage"]
+[ext_resource type="Script" path="res://scripts/battle/battle_hud.gd" id="3_hud"]
+[ext_resource type="Script" path="res://scripts/battle/local_hotseat.gd" id="4_input"]
+
+[node name="BattleArena" type="Node2D"]
+script = ExtResource("1_arena")
+
+[node name="Mages" type="Node2D" parent="."]
+
+[node name="Mage1" parent="Mages" instance=ExtResource("2_mage")]
+position = Vector2(118, 304)
+
+[node name="Mage2" parent="Mages" instance=ExtResource("2_mage")]
+position = Vector2(522, 304)
+
+[node name="Spells" type="Node2D" parent="."]
+
+[node name="Fx" type="Node2D" parent="."]
+
+[node name="HUD" type="CanvasLayer" parent="."]
+script = ExtResource("3_hud")
+
+[node name="Hotseat" type="Node" parent="."]
+script = ExtResource("4_input")
