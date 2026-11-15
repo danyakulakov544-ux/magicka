@@ -189,6 +189,8 @@ def build() -> None:
         "battle": scaled(119, (0.85, 0.55, 0.45), 2),
         "elite": scaled(124, (0.7, 0.4, 0.38), 3),
         "boss": _cabin((0.45, 0.4, 0.38)),
+        "treasure": scaled(118, (0.95, 0.78, 0.42), 3),
+        "forge": _anvil(),
     }
     # warm the tavern door
     door = objects["tavern"]
@@ -203,6 +205,18 @@ def build() -> None:
     for i, color in enumerate(((60, 110, 190), (190, 64, 48), (64, 150, 78), (210, 170, 64))):
         hero(color).save(OUT / "map" / f"hero_{i}.png")
     print("world ready", {k: v.size for k, v in objects.items()})
+
+
+def _anvil() -> Image.Image:
+    img = Image.new("RGBA", (40, 28), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    steel = (150, 154, 162, 255)
+    dark = (70, 72, 80, 255)
+    d.rectangle((4, 8, 36, 16), fill=steel)
+    d.rectangle((14, 16, 26, 26), fill=dark)
+    d.rectangle((8, 24, 32, 27), fill=steel)
+    d.rectangle((6, 9, 10, 13), fill=(210, 214, 220, 255))
+    return img
 
 
 def _cabin(mul) -> Image.Image:

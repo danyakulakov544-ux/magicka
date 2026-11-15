@@ -1,9 +1,11 @@
 {
   "nodes": [
-    {"id": "start", "type": "start", "name": "Старт", "x": 320, "y": 300, "links": ["b1", "tavern1", "b2"]},
+    {"id": "start", "type": "start", "name": "Старт", "x": 320, "y": 300, "links": ["b1", "tavern1", "b2", "forge1"]},
     {"id": "b1", "type": "battle", "name": "Бой", "foe": "kings", "x": 180, "y": 250, "links": ["shop", "chest1"]},
     {"id": "tavern1", "type": "tavern", "name": "Таверна", "x": 320, "y": 250, "links": ["chest1", "event1"]},
-    {"id": "b2", "type": "battle", "name": "Бой", "foe": "beasts", "x": 460, "y": 250, "links": ["event1", "rest1"]},
+    {"id": "b2", "type": "battle", "name": "Бой", "foe": "beasts", "x": 460, "y": 250, "links": ["event1", "rest1", "treasure1"]},
+    {"id": "forge1", "type": "forge", "name": "Кузня", "x": 72, "y": 214, "links": ["b1"]},
+    {"id": "treasure1", "type": "treasure", "name": "Клад", "x": 568, "y": 214, "links": ["b2"]},
     {"id": "shop", "type": "shop", "name": "Лавка", "x": 110, "y": 176, "links": ["elite1"]},
     {"id": "chest1", "type": "chest", "name": "Сундук", "x": 250, "y": 176, "links": ["elite1", "b3"]},
     {"id": "event1", "type": "event", "name": "Событие", "x": 390, "y": 176, "links": ["b3", "elite2"]},

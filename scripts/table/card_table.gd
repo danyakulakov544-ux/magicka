@@ -46,6 +46,7 @@ var _time := 0.0
 var _shake := Vector3.ZERO
 var _view_rot := Vector3.ZERO
 var _resolving := false
+var _took_offer := false
 var _intro_done := false
 var _weight := 0
 var _digits: Image
@@ -70,6 +71,12 @@ class BoardCard extends RefCounted:
 
 func _ready() -> void:
 	_shot = _arg("shot")
+	var hero_arg := _arg("hero")
+	if hero_arg != "":
+		Journey.foe_hero = hero_arg
+		Journey.table_mode = "battle"
+	if _shot in ["tavern", "forge", "treasure"]:
+		Journey.table_mode = _shot
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_digits = _image_of("res://assets/generated/digits.png")
 	_build_view()
@@ -80,6 +87,7 @@ func _ready() -> void:
 	_build_decks()
 	_deal_opening()
 	_build_hint()
+	_build_forge_button()
 	if _shot == "hover":
 		_place_foe_now()
 		_pose_hover()
@@ -89,8 +97,9 @@ func _ready() -> void:
 		_pose_arc()
 		_capture.call_deferred()
 	else:
-		_intro()
-		if _shot == "table":
+		if Journey.table_mode == "battle":
+			_intro()
+		if _shot != "":
 			_capture_after_intro()
 
 
@@ -130,6 +139,11 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _press() -> void:
 	var m := _table_mouse()
+	if Journey.table_mode == "tavern" or Journey.table_mode == "treasure":
+		var offer := _pick_state(m, "offer")
+		if offer != null and not _took_offer:
+			_take_offer(offer)
+		return
 	var card := _pick_hand(m)
 	if card:
 		_held = card
@@ -169,6 +183,185 @@ func _intro() -> void:
 	_intro_done = true
 
 
+func _hero_id() -> String:
+	if Journey.foe_hero != "":
+		return Journey.foe_hero
+	var mapped := {"kings": "human_king", "mages": "mage_king", "dead": "undead_king", "beasts": "bear"}
+	return str(mapped.get(Journey.foe_deck, "human_king"))
+
+
+func _build_opponent() -> void:
+	var heroes := {
+		"human_king": "res://assets/kaykit/Knight.glb",
+		"mage_king": "res://assets/kaykit/Mage.glb",
+		"undead_king": "res://assets/kaykit/Skeleton_Warrior.glb",
+		"bear": "res://assets/quaternius/bear.glb",
+	}
+	var hero := _hero_id()
+	var path: String = str(heroes.get(hero, heroes["human_king"]))
+	var actor := (load(path) as PackedScene).instantiate() as Node3D
+	_world.add_child(actor)
+	# KayKit rigs are already about human height. Skinned-mesh bounds are not.
+	if hero == "bear":
+		actor.scale = Vector3.ONE * 0.55
+		actor.position = Vector3(0.0, TABLE_Y - 0.02, -1.05)
+		actor.rotation.y = 0.0
+	else:
+		actor.scale = Vector3.ONE * 0.48
+		actor.position = Vector3(0.0, TABLE_Y - 0.15, -0.98)
+		actor.rotation.y = PI
+	_hide_spare_weapons(actor, hero)
+	if hero == "bear":
+		_bear_idle(actor)
+	else:
+		_play_sit(actor)
+	_wear_crown(actor)
+	var face := OmniLight3D.new()
+	face.light_color = Color(1.0, 0.78, 0.55)
+	face.light_energy = 0.7
+	face.omni_range = 1.8
+	face.shadow_enabled = false
+	face.position = Vector3(0.1, TABLE_Y + 0.55, -0.55)
+	_world.add_child(face)
+
+
+func _wear_crown(actor: Node3D) -> void:
+	var head := actor.find_child("head", true, false)
+	var crown := (load("res://assets/quaternius/Crown.glb") as PackedScene).instantiate() as Node3D
+	var host: Node = head if head != null else actor
+	host.add_child(crown)
+	# Source crown is about 8 mm tall. 22× on a unit-scale head is a small circlet.
+	crown.scale = Vector3.ONE * 0.35
+	crown.position = Vector3(0.0, 0.18, 0.04) if head != null else actor.position + Vector3(0, 0.7, 0)
+	crown.rotation = Vector3.ZERO
+
+
+func _hide_spare_weapons(root: Node, hero: String) -> void:
+	var keep := "1h_sword"
+	if hero == "mage_king":
+		keep = "2h_staff"
+	elif hero == "undead_king":
+		keep = "sword"
+	for node in root.find_children("*", "Node3D", true, false):
+		var nm := String(node.name).to_lower()
+		var gear := nm.contains("sword") or nm.contains("shield") or nm.contains("spellbook") or nm.contains("wand") or nm.contains("staff") or nm.contains("axe") or nm.contains("bow")
+		if gear and not nm.contains(keep):
+			node.visible = false
+
+
+func _play_sit(root: Node) -> void:
+	var found := root.find_children("*", "AnimationPlayer", true, false)
+	if found.is_empty():
+		return
+	var ap := found[0] as AnimationPlayer
+	var chosen := ""
+	for name in ap.get_animation_list():
+		var text := String(name)
+		if text.ends_with("Sit_Chair_Idle"):
+			chosen = text
+			break
+	if chosen == "":
+		for name in ap.get_animation_list():
+			var text := String(name)
+			if text == "Idle" or text.ends_with("/Idle"):
+				chosen = text
+				break
+	if chosen == "":
+		return
+	var anim := ap.get_animation(chosen)
+	if anim:
+		anim.loop_mode = Animation.LOOP_LINEAR
+	ap.play(chosen)
+
+
+func _bear_idle(actor: Node3D) -> void:
+	var base_scale := actor.scale
+	var base_yaw := actor.rotation.y
+	var breath := create_tween()
+	breath.set_loops()
+	breath.tween_property(actor, "scale", base_scale * Vector3(1.03, 1.06, 1.03), 1.3).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	breath.tween_property(actor, "scale", base_scale, 1.3).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	var look := create_tween()
+	look.set_loops()
+	look.tween_property(actor, "rotation:y", base_yaw + 0.18, 1.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	look.tween_property(actor, "rotation:y", base_yaw - 0.18, 1.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
+
+func _build_mode_props() -> void:
+	if Journey.table_mode == "treasure":
+		_place_model("res://assets/quaternius/Chest_Open.glb", Vector3(0.0, TABLE_Y, -0.42), 0.16, 20.0)
+		_place_model("res://assets/quaternius/Gold_Ingots.glb", Vector3(-0.16, TABLE_Y, -0.36), 0.05, 15.0)
+		_place_model("res://assets/quaternius/Coin.glb", Vector3(0.14, TABLE_Y, -0.34), 0.035, 40.0)
+		_place_model("res://assets/quaternius/Coin.glb", Vector3(0.18, TABLE_Y, -0.3), 0.028, 10.0)
+	elif Journey.table_mode == "forge":
+		_place_model("res://assets/kenney/survival/workbench-anvil.glb", Vector3(0.0, TABLE_Y, -0.05), 0.28, 10.0)
+
+
+func _build_forge_button() -> void:
+	if Journey.table_mode != "forge":
+		return
+	var button := Button.new()
+	button.text = "Уйти"
+	button.position = Vector2(36, 56)
+	button.size = Vector2(150, 48)
+	button.add_theme_font_override("font", FONT)
+	button.add_theme_font_size_override("font_size", 22)
+	button.pressed.connect(_leave)
+	add_child(button)
+
+
+func _lay_offers(player: Array) -> void:
+	for i in 3:
+		var data: Dictionary = player[i % player.size()]
+		var card := _make_card(data)
+		card.state = "offer"
+		card.row = ""
+		card.slot = i
+		var pos := _slot_position("player", i)
+		pos.z -= 0.06
+		var rot := _board_rotation()
+		card.root.position = pos
+		card.root.rotation = rot
+		card.rest_pos = pos
+		card.rest_rot = rot
+
+
+func _pick_state(mouse: Vector2, state: String) -> BoardCard:
+	var best: BoardCard = null
+	var best_d := 70.0
+	for c in _cards:
+		if c.state != state or not is_instance_valid(c.root):
+			continue
+		var d := _cam.unproject_position(c.root.global_position).distance_to(mouse)
+		if d < best_d:
+			best_d = d
+			best = c
+	return best
+
+
+func _take_offer(card: BoardCard) -> void:
+	_took_offer = true
+	card.state = "moving"
+	card.hand_i = 0
+	var pose := _hand_xform(0, 1)
+	var start_pos := card.root.position
+	var start_q := card.root.quaternion
+	var end_q := Quaternion.from_euler(pose["rot"])
+	var tw := create_tween()
+	tw.tween_method(func(t: float) -> void:
+		var p: Vector3 = start_pos.lerp(pose["pos"], t)
+		p.y += sin(t * PI) * 0.12
+		card.root.position = p
+		card.root.quaternion = start_q.slerp(end_q, t)
+	, 0.0, 1.0, 0.36)
+	tw.tween_callback(func() -> void:
+		card.root.rotation = pose["rot"]
+		card.rest_pos = pose["pos"]
+		card.rest_rot = pose["rot"]
+		card.state = "hand"
+	)
+
+
 func _deal_opening() -> void:
 	var all: Array = JSON.parse_string(FileAccess.get_file_as_string("res://data/cards.json"))
 	var player: Array = []
@@ -183,6 +376,13 @@ func _deal_opening() -> void:
 	if foe.is_empty():
 		foe = all.slice(4, 8)
 	_player_defs = player
+	if Journey.table_mode == "forge":
+		_intro_done = true
+		return
+	if Journey.table_mode == "tavern" or Journey.table_mode == "treasure":
+		_lay_offers(player)
+		_intro_done = true
+		return
 	for i in 5:
 		var data: Dictionary = player[i % player.size()]
 		var card := _make_card(data)
@@ -774,13 +974,13 @@ func _build_room() -> void:
 	var world_env := Environment.new()
 	var sky := Sky.new()
 	var pano := PanoramaSkyMaterial.new()
-	pano.panorama = load("res://assets/polyhaven/fireplace_1k.hdr")
+	pano.panorama = load("res://assets/polyhaven/rogland_clear_night_1k.hdr")
 	sky.sky_material = pano
 	world_env.sky = sky
-	world_env.background_mode = Environment.BG_COLOR
-	world_env.background_color = Color(0.012, 0.01, 0.009)
+	world_env.background_mode = Environment.BG_SKY
+	world_env.background_energy_multiplier = 0.75
 	world_env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
-	world_env.ambient_light_energy = 0.12
+	world_env.ambient_light_energy = 0.16
 	world_env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	world_env.tonemap_exposure = 1.05
 	world_env.glow_enabled = true
@@ -789,11 +989,11 @@ func _build_room() -> void:
 	world_env.glow_hdr_threshold = 0.95
 	world_env.fog_enabled = true
 	world_env.fog_mode = Environment.FOG_MODE_DEPTH
-	world_env.fog_depth_begin = 1.35
-	world_env.fog_depth_end = 3.6
+	world_env.fog_depth_begin = 2.6
+	world_env.fog_depth_end = 7.0
 	world_env.fog_depth_curve = 1.15
-	world_env.fog_light_color = Color(0.06, 0.04, 0.03)
-	world_env.fog_light_energy = 0.35
+	world_env.fog_light_color = Color(0.04, 0.05, 0.08)
+	world_env.fog_light_energy = 0.2
 	env.environment = world_env
 	_world.add_child(env)
 
@@ -897,16 +1097,9 @@ func _build_props() -> void:
 	_build_scales(Vector3(-0.58, TABLE_Y, -0.06))
 	_build_bell(Vector3(-0.46, TABLE_Y, 0.22))
 	_build_dice(Vector3(-0.4, TABLE_Y, 0.26))
-
-	var keeper := _place_model("res://assets/kenney/graveyard/character-keeper.glb", Vector3(0.0, TABLE_Y - 0.08, -0.92), 0.78, 180.0)
-	_silhouette(keeper)
-	var rim := OmniLight3D.new()
-	rim.light_color = Color(0.55, 0.62, 0.72)
-	rim.light_energy = 0.22
-	rim.omni_range = 1.6
-	rim.shadow_enabled = false
-	rim.position = Vector3(0.0, 1.25, -1.35)
-	_world.add_child(rim)
+	_build_mode_props()
+	if Journey.table_mode == "battle":
+		_build_opponent()
 
 	for n in 8:
 		var mote := MeshInstance3D.new()
@@ -1052,6 +1245,10 @@ func _build_hint() -> void:
 	_vp.add_child(layer)
 	var hint := Label.new()
 	hint.text = "ЛКМ — карта в слот    WASD — взгляд    Пробел — гонг    Esc — назад"
+	if Journey.table_mode == "tavern" or Journey.table_mode == "treasure":
+		hint.text = "Кликни одну карту, чтобы взять    Esc — назад"
+	elif Journey.table_mode == "forge":
+		hint.text = "Кузня. Наковальня пока просто стоит здесь    Esc — назад"
 	hint.position = Vector2(70, 8)
 	hint.size = Vector2(820, 28)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -1275,8 +1472,12 @@ func _arg(flag: String) -> String:
 func _capture_after_intro() -> void:
 	while not _intro_done:
 		await get_tree().process_frame
-	await get_tree().create_timer(0.35).timeout
-	await _save_shot("/tmp/shot_table.png")
+	await get_tree().create_timer(0.85).timeout
+	var hero := _arg("hero")
+	var name := _shot if _shot != "" else "table"
+	if hero != "":
+		name = hero
+	await _save_shot("/tmp/shot_%s.png" % name)
 
 
 func _capture() -> void:

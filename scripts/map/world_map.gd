@@ -4,13 +4,20 @@ const FONT := preload("res://fonts/NotoSans-Regular.ttf")
 const MAP_SIZE := Vector2(640, 360)
 
 const PLAYERS := [
-	{"name": "Синий", "deck": "mages", "deck_name": "Маги", "piece": "Blue"},
-	{"name": "Красный", "deck": "kings", "deck_name": "Короли", "piece": "Red"},
-	{"name": "Зелёный", "deck": "beasts", "deck_name": "Звери", "piece": "Green"},
-	{"name": "Жёлтый", "deck": "dead", "deck_name": "Мертвецы", "piece": "Yellow"},
+	{"name": "Маг", "deck": "mages", "deck_name": "Маги", "portrait": "mage_king"},
+	{"name": "Король", "deck": "kings", "deck_name": "Короли", "portrait": "human_king"},
+	{"name": "Медведь", "deck": "beasts", "deck_name": "Звери", "portrait": "bear"},
+	{"name": "Нежить", "deck": "dead", "deck_name": "Мертвецы", "portrait": "undead_king"},
 ]
 
 const BATTLE_TYPES := ["battle", "elite", "boss"]
+const TABLE_TYPES := ["battle", "elite", "boss", "tavern", "forge", "treasure"]
+const HERO_FOR_FOE := {
+	"kings": "human_king",
+	"mages": "mage_king",
+	"dead": "undead_king",
+	"beasts": "bear",
+}
 
 var _nodes: Dictionary = {}
 var _neighbors: Dictionary = {}
@@ -167,9 +174,11 @@ func _build_view() -> void:
 
 	for i in PLAYERS.size():
 		var piece := Sprite2D.new()
-		piece.texture = load("res://assets/generated/map/hero_%d.png" % i)
+		piece.texture = load("res://assets/portraits/heroes/%s.png" % str(PLAYERS[i]["portrait"]))
 		piece.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		piece.centered = true
+		var shown := 34.0
+		piece.scale = Vector2.ONE * (shown / piece.texture.get_width())
 		piece.offset = Vector2(0, -piece.texture.get_height() * 0.5)
 		piece.z_index = 4
 		world.add_child(piece)
@@ -253,7 +262,7 @@ func _hover_tip(screen: Vector2) -> void:
 		return
 	var n: Dictionary = _nodes[hit]
 	var extra := ""
-	if BATTLE_TYPES.has(n["type"]):
+	if BATTLE_TYPES.has(n["type"]) or TABLE_TYPES.has(n["type"]):
 		extra = "  ·  стол"
 	elif _neighbors.get(_tokens[_selected], []).has(hit):
 		extra = "  ·  можно идти"
@@ -285,7 +294,7 @@ func _walk(target: String) -> void:
 		_moving = false
 		_layout_tokens(false)
 		var n: Dictionary = _nodes[target]
-		if BATTLE_TYPES.has(n["type"]):
+		if TABLE_TYPES.has(n["type"]):
 			_enter_table(n)
 	)
 
@@ -295,7 +304,9 @@ func _enter_table(n: Dictionary) -> void:
 	_visited[n["id"]] = true
 	Journey.from_map = true
 	Journey.player_deck = str(PLAYERS[_selected]["deck"])
-	Journey.foe_deck = str(n["foe"])
+	Journey.table_mode = "battle" if BATTLE_TYPES.has(n["type"]) else str(n["type"])
+	Journey.foe_deck = str(n.get("foe", "dead"))
+	Journey.foe_hero = str(HERO_FOR_FOE.get(Journey.foe_deck, "human_king"))
 	Journey.map_state = {
 		"tokens": _tokens.duplicate(),
 		"selected": _selected,
