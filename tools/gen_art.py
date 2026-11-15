@@ -346,6 +346,8 @@ def save_digits() -> None:
 
 
 def map_background() -> None:
+    # The journey map is composed by tools/build_world.py from Kenney Tiny Town tiles.
+    return
     w, h = 640, 360
     img = Image.new("RGBA", (w, h), (0, 0, 0, 255))
     px = img.load()

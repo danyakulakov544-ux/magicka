@@ -35,7 +35,7 @@ func _ready() -> void:
 	add_child(col)
 
 	var title := Label.new()
-	title.text = "MAGICKA"
+	title.text = "4D"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_font(title, 64, Color("f0d7a2"))
 	col.add_child(title)
@@ -50,10 +50,10 @@ func _ready() -> void:
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.add_theme_constant_override("separation", 10)
 	col.add_child(row)
-	for piece in ["Blue", "Red", "Green", "Yellow"]:
+	for i in 4:
 		var icon := TextureRect.new()
 		icon.custom_minimum_size = Vector2(42, 42)
-		icon.texture = load("res://assets/kenney/pieces/%s.png" % piece)
+		icon.texture = load("res://assets/generated/map/hero_%d.png" % i)
 		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST

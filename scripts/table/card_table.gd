@@ -42,11 +42,9 @@ var _cards: Array = []
 var _slot_mats: Array[StandardMaterial3D] = []
 var _hover: BoardCard
 var _held: BoardCard
-var _look_on := false
 var _time := 0.0
 var _shake := Vector3.ZERO
-var _peek_yaw := 0.0
-var _peek_pitch := 0.0
+var _view_rot := Vector3.ZERO
 var _resolving := false
 var _intro_done := false
 var _weight := 0
@@ -109,7 +107,6 @@ func _process(delta: float) -> void:
 		_held.root.rotation = Vector3(-0.35, 0.0, clampf(-aim.x * 0.15, -0.2, 0.2))
 	elif not _resolving:
 		var m := _table_mouse()
-		_update_peek(m)
 		var found := _pick_hand(m)
 		if found != _hover:
 			_set_hover(found)
@@ -119,9 +116,7 @@ func _process(delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if _shot != "":
 		return
-	if event is InputEventMouseMotion:
-		_look_on = true
-	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
 			_press()
 		else:
@@ -698,36 +693,30 @@ func _mouse_on_plane(y: float) -> Vector3:
 	return p
 
 
+func _view_target() -> Vector3:
+	# Fixed seats. Mouse never moves the head.
+	if _shot == "west":
+		return Vector3(deg_to_rad(3.0), deg_to_rad(24.0), 0.0)
+	if _shot != "":
+		return Vector3.ZERO
+	if Input.is_key_pressed(KEY_W):
+		return Vector3(deg_to_rad(-18.0), 0.0, 0.0)
+	if Input.is_key_pressed(KEY_S):
+		return Vector3(deg_to_rad(14.0), 0.0, 0.0)
+	if Input.is_key_pressed(KEY_A):
+		return Vector3(deg_to_rad(3.0), deg_to_rad(24.0), 0.0)
+	if Input.is_key_pressed(KEY_D):
+		return Vector3(deg_to_rad(3.0), deg_to_rad(-24.0), 0.0)
+	return Vector3.ZERO
+
+
 func _update_camera(delta: float) -> void:
-	var yaw := 0.0
-	var pitch := 0.0
-	if _look_on and _shot == "":
-		var size := get_viewport().get_visible_rect().size
-		var n := (get_viewport().get_mouse_position() / size) * 2.0 - Vector2.ONE
-		var edge := smoothstep(0.45, 1.0, maxf(absf(n.x), absf(n.y)))
-		yaw = n.x * deg_to_rad(16.0) * edge
-		pitch = n.y * deg_to_rad(9.0) * edge
-	yaw += _peek_yaw
-	pitch += _peek_pitch
-	var child := _cam
-	child.rotation.y = lerpf(child.rotation.y, yaw, 1.0 - exp(-delta * 6.0))
-	child.rotation.x = lerpf(child.rotation.x, pitch, 1.0 - exp(-delta * 6.0))
-	var breathe := sin(_time * TAU / 4.0) * 0.003
+	var target := _view_target()
+	_view_rot = _view_rot.lerp(target, 1.0 - exp(-delta * 7.0))
+	_cam.rotation = _view_rot
+	var breathe := sin(_time * TAU / 4.0) * 0.002
 	_shake = _shake.lerp(Vector3.ZERO, 1.0 - exp(-delta * 12.0))
 	_rig.position = _base_cam_pos + Vector3(0, breathe, 0) + _shake
-
-
-func _update_peek(mouse: Vector2) -> void:
-	_peek_yaw = 0.0
-	_peek_pitch = 0.0
-	if _near(_scales, mouse, 80.0):
-		_peek_yaw = -0.05
-	elif _near(_bell, mouse, 70.0):
-		_peek_yaw = -0.045
-		_peek_pitch = 0.02
-	elif _lamp_anchor and _near(_lamp_anchor, mouse, 80.0):
-		_peek_yaw = 0.05
-		_peek_pitch = -0.02
 
 
 func _punch(amount: float) -> void:
@@ -738,7 +727,7 @@ func _flicker() -> void:
 	if _lamp == null:
 		return
 	var n := sin(_time * 22.0) * 0.45 + sin(_time * 37.0) * 0.35 + sin(_time * 9.0) * 0.2
-	_lamp.light_energy = 1.7 * (1.0 + n * 0.11)
+	_lamp.light_energy = 1.15 * (1.0 + n * 0.08)
 	if _flame:
 		_flame.scale = Vector3.ONE * (1.0 + n * 0.08)
 
@@ -791,12 +780,12 @@ func _build_room() -> void:
 	world_env.background_mode = Environment.BG_COLOR
 	world_env.background_color = Color(0.012, 0.01, 0.009)
 	world_env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
-	world_env.ambient_light_energy = 0.18
+	world_env.ambient_light_energy = 0.12
 	world_env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	world_env.tonemap_exposure = 1.05
 	world_env.glow_enabled = true
-	world_env.glow_intensity = 0.35
-	world_env.glow_bloom = 0.12
+	world_env.glow_intensity = 0.18
+	world_env.glow_bloom = 0.05
 	world_env.glow_hdr_threshold = 0.95
 	world_env.fog_enabled = true
 	world_env.fog_mode = Environment.FOG_MODE_DEPTH
@@ -822,14 +811,14 @@ func _build_room() -> void:
 
 	var sun := DirectionalLight3D.new()
 	sun.light_color = Color(1.0, 0.92, 0.82)
-	sun.light_energy = 0.07
+	sun.light_energy = 0.03
 	sun.rotation_degrees = Vector3(-55, 25, 0)
 	sun.shadow_enabled = false
 	_world.add_child(sun)
 
 	var fill := OmniLight3D.new()
 	fill.light_color = Color(0.35, 0.45, 0.55)
-	fill.light_energy = 0.28
+	fill.light_energy = 0.1
 	fill.omni_range = 3.4
 	fill.shadow_enabled = false
 	fill.position = Vector3(-0.2, 1.35, 0.4)
@@ -851,7 +840,7 @@ func _build_room() -> void:
 
 
 func _build_table() -> void:
-	var top := _box(Vector3(1.66, 0.06, 1.2), Vector3(0, TABLE_Y - 0.03, -0.04), _wood(Color(0.72, 0.6, 0.5), 1.3))
+	var top := _box(Vector3(1.66, 0.06, 1.2), Vector3(0, TABLE_Y - 0.03, -0.04), _wood(Color(0.4, 0.44, 0.4), 1.3))
 	_world.add_child(top)
 	var apron := _box(Vector3(1.58, 0.1, 1.12), Vector3(0, TABLE_Y - 0.11, -0.04), _wood(Color(0.28, 0.18, 0.11), 1.2))
 	_world.add_child(apron)
@@ -865,8 +854,8 @@ func _build_props() -> void:
 	var light_pos := Vector3(0.46, TABLE_Y + 0.2, -0.28)
 	_lamp_anchor = _build_lamp(Vector3(0.46, TABLE_Y, -0.28), light_pos)
 	_lamp = OmniLight3D.new()
-	_lamp.light_color = Color(1.0, 0.64, 0.32)
-	_lamp.light_energy = 1.7
+	_lamp.light_color = Color(1.0, 0.7, 0.4)
+	_lamp.light_energy = 1.15
 	_lamp.omni_range = 2.2
 	_lamp.shadow_enabled = true
 	_lamp.shadow_bias = 0.08
@@ -913,7 +902,7 @@ func _build_props() -> void:
 	_silhouette(keeper)
 	var rim := OmniLight3D.new()
 	rim.light_color = Color(0.55, 0.62, 0.72)
-	rim.light_energy = 0.55
+	rim.light_energy = 0.22
 	rim.omni_range = 1.6
 	rim.shadow_enabled = false
 	rim.position = Vector3(0.0, 1.25, -1.35)
@@ -1062,7 +1051,7 @@ func _build_hint() -> void:
 	var layer := CanvasLayer.new()
 	_vp.add_child(layer)
 	var hint := Label.new()
-	hint.text = "ЛКМ — карта в слот     колода справа — добор     Пробел — гонг     Esc — назад"
+	hint.text = "ЛКМ — карта в слот    WASD — взгляд    Пробел — гонг    Esc — назад"
 	hint.position = Vector2(70, 8)
 	hint.size = Vector2(820, 28)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

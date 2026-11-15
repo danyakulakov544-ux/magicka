@@ -64,30 +64,30 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p build/windows build/linux
-          godot --headless --path . --export-release "Windows Desktop" "build/windows/MagickaArena.exe"
-          godot --headless --path . --export-release "Linux" "build/linux/MagickaArena.x86_64"
-          test -f build/windows/MagickaArena.exe
-          test ! -e build/windows/MagickaArena.pck
-          file build/windows/MagickaArena.exe | grep -q 'PE32+'
-          test "$(stat -c%s build/windows/MagickaArena.exe)" -gt 30000000
-          test -f build/linux/MagickaArena.x86_64
-          test ! -e build/linux/MagickaArena.pck
-          chmod +x build/linux/MagickaArena.x86_64
-          (cd build/windows && zip -9 -r "$GITHUB_WORKSPACE/MagickaArena-windows.zip" .)
-          (cd build/linux && zip -9 -r "$GITHUB_WORKSPACE/MagickaArena-linux.zip" .)
+          godot --headless --path . --export-release "Windows Desktop" "build/windows/4D.exe"
+          godot --headless --path . --export-release "Linux" "build/linux/4D.x86_64"
+          test -f build/windows/4D.exe
+          test ! -e build/windows/4D.pck
+          file build/windows/4D.exe | grep -q 'PE32+'
+          test "$(stat -c%s build/windows/4D.exe)" -gt 30000000
+          test -f build/linux/4D.x86_64
+          test ! -e build/linux/4D.pck
+          chmod +x build/linux/4D.x86_64
+          (cd build/windows && zip -9 -r "$GITHUB_WORKSPACE/4D-windows.zip" .)
+          (cd build/linux && zip -9 -r "$GITHUB_WORKSPACE/4D-linux.zip" .)
 
       - name: Upload Windows build
         uses: actions/upload-artifact@v4
         with:
-          name: MagickaArena-windows
-          path: MagickaArena-windows.zip
+          name: 4D-windows
+          path: 4D-windows.zip
           if-no-files-found: error
 
       - name: Upload Linux build
         uses: actions/upload-artifact@v4
         with:
-          name: MagickaArena-linux
-          path: MagickaArena-linux.zip
+          name: 4D-linux
+          path: 4D-linux.zip
           if-no-files-found: error
 
       - name: Publish rolling prerelease
@@ -100,7 +100,7 @@ jobs:
           gh release create latest \
             --prerelease \
             --target "${{ github.sha }}" \
-            --title "Magicka — последняя сборка" \
-            --notes "Сборка ${{ github.sha }} из ветки ${{ github.ref_name }}. Прототип: карта похода и карточный стол. Windows: распакуйте MagickaArena-windows.zip и запустите MagickaArena.exe. Linux: MagickaArena-linux.zip, затем chmod +x MagickaArena.x86_64." \
-            MagickaArena-windows.zip \
-            MagickaArena-linux.zip
+            --title "4D — последняя сборка" \
+            --notes "Сборка ${{ github.sha }} из ветки ${{ github.ref_name }}. Прототип: карта похода и карточный стол. Windows: распакуйте 4D-windows.zip и запустите 4D.exe. Linux: 4D-linux.zip, затем chmod +x 4D.x86_64." \
+            4D-windows.zip \
+            4D-linux.zip

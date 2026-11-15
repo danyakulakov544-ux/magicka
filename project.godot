@@ -5,7 +5,7 @@ config_version=5
 
 [application]
 
-config/name="Magicka"
+config/name="4D"
 config/description="Пиксельная карта похода и карточный стол."
 run/main_scene="res://scenes/menu/main_menu.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")

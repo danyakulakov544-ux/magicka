@@ -10,30 +10,6 @@ const PLAYERS := [
 	{"name": "Жёлтый", "deck": "dead", "deck_name": "Мертвецы", "piece": "Yellow"},
 ]
 
-const ICONS := {
-	"start": "campfire",
-	"battle": "sword",
-	"tavern": "structure_house",
-	"shop": "pouch",
-	"chest": "chest",
-	"event": "book_open",
-	"rest": "campfire",
-	"elite": "skull",
-	"boss": "crown_a",
-}
-
-const RIM := {
-	"start": Color("e6d2a4"),
-	"battle": Color("e25b4a"),
-	"tavern": Color("e0a15a"),
-	"shop": Color("8ddeaf"),
-	"chest": Color("e6c15a"),
-	"event": Color("cbb6ee"),
-	"rest": Color("e08a4a"),
-	"elite": Color("e25b78"),
-	"boss": Color("f2d48a"),
-}
-
 const BATTLE_TYPES := ["battle", "elite", "boss"]
 
 var _nodes: Dictionary = {}
@@ -120,31 +96,18 @@ func draw_board(canvas: Node2D) -> void:
 			if seen.has(key):
 				continue
 			seen[key] = true
+			if not hot.has(id + ">" + nb):
+				continue
 			var pts := _curve(_nodes[id]["pos"], _nodes[nb]["pos"])
-			canvas.draw_polyline(pts, Color(0.05, 0.04, 0.03), 5.0, false)
-			var linked := hot.has(id + ">" + nb)
-			var col := Color("f0d090") if linked else Color("6a5438")
-			canvas.draw_polyline(pts, col, 2.0, false)
-			if linked:
-				_dashes(canvas, pts, Color("fff1c4"), fmod(_time * 28.0, 12.0))
+			_dashes(canvas, pts, Color(0.95, 0.78, 0.45, 0.85), fmod(_time * 22.0, 12.0))
 	for id in _nodes:
-		var n: Dictionary = _nodes[id]
-		var p: Vector2 = n["pos"]
-		var rim: Color = RIM.get(n["type"], Color("cbb892"))
+		var p: Vector2 = _nodes[id]["pos"]
 		var reachable: bool = (_neighbors[here] as Array).has(id)
-		canvas.draw_circle(p + Vector2(1, 2), 18, Color(0, 0, 0, 0.45))
-		canvas.draw_circle(p, 17, Color(0.09, 0.07, 0.06, 0.94))
-		var ring := rim
 		if reachable and not _moving:
-			ring.a = 0.65 + 0.35 * sin(_time * 4.0 + p.x)
-		canvas.draw_arc(p, 18, 0, TAU, 32, ring, 2.0, false)
+			var glow := Color(1.0, 0.72, 0.35, 0.22 + 0.1 * sin(_time * 3.0))
+			canvas.draw_circle(p + Vector2(0, -8), 18, glow)
 		if id == here:
-			canvas.draw_arc(p, 21, 0, TAU, 32, Color("fff6d8"), 1.0, false)
-		if _visited.has(id):
-			canvas.draw_circle(p + Vector2(12, -12), 2, Color("e7c56a"))
-	for i in _pieces.size():
-		var at: Vector2 = _pieces[i].position + Vector2(0, 8)
-		canvas.draw_circle(at, 5, Color(0, 0, 0, 0.35))
+			canvas.draw_arc(p + Vector2(0, -6), 16, 0, TAU, 24, Color(1, 0.9, 0.7, 0.7), 1.0, false)
 
 
 func _load_map() -> void:
@@ -192,12 +155,11 @@ func _build_view() -> void:
 
 	for id in _nodes:
 		var n: Dictionary = _nodes[id]
-		var icon_name: String = ICONS.get(n["type"], "sword")
 		var spr := Sprite2D.new()
-		spr.texture = load("res://assets/kenney/icons/%s.png" % icon_name)
+		spr.texture = load("res://assets/generated/map/obj_%s.png" % n["type"])
 		spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		var shown := 16.0
-		spr.scale = Vector2.ONE * (shown / spr.texture.get_width())
+		spr.centered = true
+		spr.offset = Vector2(0, -spr.texture.get_height() * 0.5)
 		spr.position = n["pos"]
 		spr.z_index = 2
 		world.add_child(spr)
@@ -205,23 +167,13 @@ func _build_view() -> void:
 
 	for i in PLAYERS.size():
 		var piece := Sprite2D.new()
-		piece.texture = load("res://assets/kenney/pieces/%s.png" % PLAYERS[i]["piece"])
+		piece.texture = load("res://assets/generated/map/hero_%d.png" % i)
 		piece.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		piece.scale = Vector2.ONE * (18.0 / piece.texture.get_width())
+		piece.centered = true
+		piece.offset = Vector2(0, -piece.texture.get_height() * 0.5)
 		piece.z_index = 4
 		world.add_child(piece)
 		_pieces.append(piece)
-
-	var fog_tex: Texture2D = preload("res://assets/generated/fog.png")
-	for i in 4:
-		var fog := Sprite2D.new()
-		fog.texture = fog_tex
-		fog.modulate = Color(1, 1, 1, 0.22)
-		fog.scale = Vector2(2.4, 1.1)
-		fog.z_index = 6
-		fog.position = Vector2(80 + i * 160, 20 if i % 2 == 0 else 340)
-		world.add_child(fog)
-		_drift(fog, 18.0 + i * 6.0, 1 if i % 2 == 0 else -1)
 
 	_screen = TextureRect.new()
 	_screen.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -230,14 +182,10 @@ func _build_view() -> void:
 	_screen.stretch_mode = TextureRect.STRETCH_SCALE
 	_screen.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	_screen.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var post := ShaderMaterial.new()
+	post.shader = load("res://shaders/map_post.gdshader")
+	_screen.material = post
 	add_child(_screen)
-
-
-func _drift(fog: Sprite2D, speed: float, dir: float) -> void:
-	var tw := create_tween()
-	tw.set_loops()
-	tw.tween_property(fog, "position:x", fog.position.x + dir * 40.0, speed).set_trans(Tween.TRANS_SINE)
-	tw.tween_property(fog, "position:x", fog.position.x, speed).set_trans(Tween.TRANS_SINE)
 
 
 func _build_ui() -> void:
@@ -253,7 +201,7 @@ func _build_ui() -> void:
 	add_child(_who)
 
 	var hint := Label.new()
-	hint.text = "1–4 фишка   ·   клик по соседнему узлу   ·   бой открывает стол   ·   Esc меню"
+	hint.text = "1–4 фишка   ·   клик по соседнему месту   ·   бой открывает стол   ·   Esc меню"
 	hint.position = Vector2(28, 676)
 	_style(hint, 16, Color(0.9, 0.82, 0.68, 0.9))
 	add_child(hint)
@@ -289,7 +237,7 @@ func _click(screen: Vector2) -> void:
 		if _pieces[i].position.distance_to(p) < 14.0:
 			_selected = i
 			return
-	var hit := _node_at(p, 22.0)
+	var hit := _node_at(p, 30.0)
 	if hit == "":
 		return
 	if not _neighbors.get(_tokens[_selected], []).has(hit):
@@ -299,7 +247,7 @@ func _click(screen: Vector2) -> void:
 
 func _hover_tip(screen: Vector2) -> void:
 	var p := _to_map(screen)
-	var hit := _node_at(p, 22.0)
+	var hit := _node_at(p, 30.0)
 	if hit == "":
 		_tooltip.visible = false
 		return
@@ -379,14 +327,16 @@ func _token_pos(player: int) -> Vector2:
 	var idx := group.find(player)
 	var span := 16.0
 	var x := (float(idx) - float(group.size() - 1) * 0.5) * span
-	return _nodes[node_id]["pos"] + Vector2(x, 28)
+	return _nodes[node_id]["pos"] + Vector2(x, 4)
 
 
 func _node_at(p: Vector2, radius: float) -> String:
 	var best := ""
 	var best_d := radius
 	for id in _nodes:
-		var d: float = _nodes[id]["pos"].distance_to(p)
+		var feet: Vector2 = _nodes[id]["pos"]
+		var body := feet + Vector2(0, -18)
+		var d: float = minf(feet.distance_to(p), body.distance_to(p))
 		if d <= best_d:
 			best_d = d
 			best = id
